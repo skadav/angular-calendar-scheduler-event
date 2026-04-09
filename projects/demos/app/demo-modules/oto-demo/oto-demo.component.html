@@ -1,0 +1,149 @@
+<div class="row text-center">
+  <div class="col-md-4">
+    <div class="btn-group">
+      <div
+        class="btn btn-primary"
+        mwlCalendarPreviousView
+        [view]="view"
+        [(viewDate)]="viewDate"
+        (viewDateChange)="closeOpenMonthViewDay()"
+      >
+        Previous
+      </div>
+      <div
+        class="btn btn-outline-secondary"
+        mwlCalendarToday
+        [(viewDate)]="viewDate"
+      >
+        Today
+      </div>
+      <div
+        class="btn btn-primary"
+        mwlCalendarNextView
+        [view]="view"
+        [(viewDate)]="viewDate"
+        (viewDateChange)="closeOpenMonthViewDay()"
+      >
+        Next
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <h3>{{ viewDate | calendarDate: view + 'ViewTitle' : 'en' }}</h3>
+  </div>
+
+  <div class="col-md-4">
+    <div class="btn-group">
+      <div
+        class="btn btn-primary"
+        (click)="setView(CalendarView.Month)"
+        [class.active]="view === CalendarView.Month"
+      >
+        Month
+      </div>
+      <div
+        class="btn btn-primary"
+        (click)="setView(CalendarView.Week)"
+        [class.active]="view === CalendarView.Week"
+      >
+        Week
+      </div>
+      <div
+        class="btn btn-primary"
+        (click)="setView(CalendarView.Day)"
+        [class.active]="view === CalendarView.Day"
+      >
+        Day
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  style="
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    margin-top: 24px;
+    align-items: flex-start;
+  "
+>
+  @for (legend of legends; track $index) {
+    <div style="display: flex; align-items: center; column-gap: 8px">
+      <div
+        style="width: 20px; height: 20px; flex-shrink: 0; display: inline-block"
+        [style.background-color]="legend.primary"
+      ></div>
+      <span translate>{{ legend.secondaryText }}</span>
+    </div>
+  }
+</div>
+<div>
+  @switch (view) {
+    @case (CalendarView.Month) {
+      <mwl-calendar-month-view
+        [viewDate]="viewDate"
+        [events]="events"
+        [refresh]="refresh"
+        [activeDayIsOpen]="activeDayIsOpen"
+        (dayClicked)="dayClicked($event.day)"
+        (eventClicked)="handleEvent('Clicked', $event.event)"
+        (eventTimesChanged)="eventTimesChanged($event)"
+      />
+    }
+    @case (CalendarView.Week) {
+      <mwl-oto-calendar-week-view
+        [viewDate]="viewDate"
+        [events]="events"
+        [weekOperationHour]="weekOperationHour"
+        [refresh]="refresh"
+        (eventClicked)="handleEvent('Clicked', $event.event)"
+        (eventTimesChanged)="eventTimesChanged($event)"
+        (dayHeaderClicked)="dayHeaderClicked($event)"
+      />
+    }
+    @case (CalendarView.Day) {
+      <mwl-oto-calendar-day-view
+        [columns]="columns"
+        [daysInWeek]="columns.length"
+        [viewDate]="viewDate"
+        [events]="events"
+        [operationHour]="dayOperationHour"
+        [refresh]="refresh"
+        (eventClicked)="handleEvent('Clicked', $event.event)"
+        (eventTimesChanged)="eventTimesChanged($event)"
+      />
+    }
+  }
+</div>
+
+<ng-template #modalContent let-close="close">
+  <div class="modal-header">
+    <h5 class="modal-title">Event action occurred</h5>
+    <button type="button" class="close" (click)="close()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div>
+      Action:
+      <pre>{{ modalData?.action }}</pre>
+    </div>
+    <div>
+      Event:
+      <pre>{{ modalData?.event.data.id }}</pre>
+    </div>
+    @if (modalData.action === 'rescheduled') {
+      <div>
+        proposedDate
+        <pre>{{ modalData?.event.start }}</pre>
+        <pre>{{ modalData?.event.end }}</pre>
+      </div>
+    }
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="close()">
+      OK
+    </button>
+  </div>
+</ng-template>

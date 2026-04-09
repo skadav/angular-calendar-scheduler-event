@@ -11,6 +11,7 @@ import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
 import { provideFlatpickrDefaults } from 'angularx-flatpickr';
 import { provideHttpClient } from '@angular/common/http';
 import { DateAdapter, provideCalendar } from 'angular-calendar';
+import { OtoDemoComponent } from './app/demo-modules/oto-demo/oto-demo.component';
 
 if (environment.production) {
   enableProdMode();
@@ -40,6 +41,13 @@ bootstrapApplication(DemoAppComponent, {
     provideHttpClient(),
     provideRouter(
       [
+        {
+          path: 'oto-demo',
+          component: OtoDemoComponent,
+          data: {
+            label: 'Oto Demo',
+          },
+        },
         {
           path: 'kitchen-sink',
           component: DefaultDemoComponent,

@@ -25,6 +25,7 @@ import { CalendarDatePipe } from '../../../common/calendar-date/calendar-date.pi
       <div class="cal-day-headers" role="row">
         @for (day of days; track day.date.toISOString()) {
           <div
+            style="cursor: pointer;"
             class="cal-header"
             [class.cal-past]="day.isPast"
             [class.cal-today]="day.isToday"
@@ -45,6 +46,7 @@ import { CalendarDatePipe } from '../../../common/calendar-date/calendar-date.pi
             (dragEnter)="dragEnter.emit({ date: day.date })"
             tabindex="0"
             role="columnheader"
+            title="Click here to view detail"
           >
             <b>{{ day.date | calendarDate: 'weekViewColumnHeader' : locale }}</b
             ><br />

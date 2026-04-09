@@ -13,6 +13,7 @@ import { CalendarA11yPipe } from '../calendar-a11y/calendar-a11y.pipe';
         <span class="cal-event-actions">
           @for (action of event.actions; track action.id ?? action) {
             <a
+              style="font-weight: bold;color: black;"
               class="cal-event-action"
               href="javascript:;"
               (mwlClick)="action.onClick({ event: event, sourceEvent: $event })"

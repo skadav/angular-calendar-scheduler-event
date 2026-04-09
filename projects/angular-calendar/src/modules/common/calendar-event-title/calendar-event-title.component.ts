@@ -10,6 +10,7 @@ import { CalendarA11yPipe } from '../calendar-a11y/calendar-a11y.pipe';
     <ng-template #defaultTemplate let-event="event" let-view="view">
       <span
         class="cal-event-title"
+        style="color: black;"
         [innerHTML]="event.title | calendarEventTitle: view : event"
         [attr.aria-hidden]="{} | calendarA11y: 'hideEventTitle'"
       >

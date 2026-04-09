@@ -173,3 +173,27 @@ export function isWithinThreshold({ x, y }: { x: number; y: number }) {
   const DRAG_THRESHOLD = 1;
   return Math.abs(x) > DRAG_THRESHOLD || Math.abs(y) > DRAG_THRESHOLD;
 }
+
+export function isNull(variable: any): boolean {
+  return (
+    variable === undefined ||
+    variable === null ||
+    variable === '' ||
+    (typeof variable === 'object' &&
+      variable !== null &&
+      variable !== undefined &&
+      Object.keys(variable).length === 0)
+  );
+}
+
+export function isNotNull(variable: any): boolean {
+  const isNull =
+    variable === undefined ||
+    variable === null ||
+    variable === '' ||
+    (typeof variable === 'object' &&
+      variable !== null &&
+      variable !== undefined &&
+      Object.keys(variable).length === 0);
+  return !isNull;
+}

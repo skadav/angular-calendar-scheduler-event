@@ -13,8 +13,7 @@ import { CalendarWeekViewBeforeRenderEvent } from '../../week/calendar-week.modu
 import { ResizeCursors } from 'angular-resizable-element';
 import { CalendarWeekViewComponent } from '../../week/calendar-week-view/calendar-week-view.component';
 
-export type CalendarDayViewBeforeRenderEvent =
-  CalendarWeekViewBeforeRenderEvent;
+type CalendarDayViewBeforeRenderEvent = CalendarWeekViewBeforeRenderEvent;
 
 /**
  * Shows all events on a given day. Example usage:
@@ -81,7 +80,7 @@ export class CalendarDayViewComponent {
   /**
    * The number of segments in an hour. Must divide equally into 60.
    */
-  @Input() hourSegments: number = 2;
+  @Input() hourSegments: number = 4;
 
   /**
    * The height in pixels of each hour segment

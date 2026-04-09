@@ -19,6 +19,7 @@ import { CalendarEventActionsComponent } from '../../../common/calendar-event-ac
 import { CalendarEventTitleComponent } from '../../../common/calendar-event-title/calendar-event-title.component';
 import { CalendarEventTitlePipe } from '../../../common/calendar-event-title/calendar-event-title.pipe';
 import { CalendarA11yPipe } from '../../../common/calendar-a11y/calendar-a11y.pipe';
+import { OtoCalendarEventTimeTitleComponent } from '../../../common/oto-calendar-event-time-title/oto-calendar-event-time-title.component';
 
 @Component({
   selector: 'mwl-calendar-week-view-event',
@@ -64,6 +65,10 @@ import { CalendarA11yPipe } from '../../../common/calendar-a11y/calendar-a11y.pi
             | calendarA11y: 'eventDescription'
         "
       >
+        <mwl-oto-calendar-event-time-title
+          [event]="weekEvent.tempEvent || weekEvent.event"
+          [customTemplate]="eventTimeTitleTemplate"
+        />
         <mwl-calendar-event-actions
           [event]="weekEvent.tempEvent || weekEvent.event"
           [customTemplate]="eventActionsTemplate"
@@ -101,6 +106,7 @@ import { CalendarA11yPipe } from '../../../common/calendar-a11y/calendar-a11y.pi
     NgTemplateOutlet,
     CalendarEventTitlePipe,
     CalendarA11yPipe,
+    OtoCalendarEventTimeTitleComponent,
   ],
 })
 export class CalendarWeekViewEventComponent {
@@ -121,6 +127,8 @@ export class CalendarWeekViewEventComponent {
   @Input() eventTitleTemplate: TemplateRef<any>;
 
   @Input() eventActionsTemplate: TemplateRef<any>;
+
+  @Input() eventTimeTitleTemplate: TemplateRef<any>;
 
   @Input() tooltipTemplate: TemplateRef<any>;
 

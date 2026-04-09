@@ -62,7 +62,7 @@ export interface CalendarMonthViewEventTimesChangedEvent<
 @Component({
   selector: 'mwl-calendar-month-view',
   template: `
-    <div class="cal-month-view" role="grid">
+    <div class="cal-month-view" role="grid" style="margin-top: 20px;">
       <mwl-calendar-month-view-header
         [days]="columnHeaders"
         [locale]="locale"

@@ -19,12 +19,7 @@ import {
   CalendarEvent,
   WeekViewAllDayEvent,
   WeekView,
-  ViewPeriod,
-  WeekViewHourColumn,
   WeekViewTimeEvent,
-  WeekViewHourSegment,
-  WeekViewHour,
-  WeekViewAllDayEventRow,
 } from 'calendar-utils';
 import {
   ResizeEvent,
@@ -59,37 +54,28 @@ import {
   DraggableDirective,
 } from 'angular-draggable-droppable';
 import { PlacementArray } from 'positioning';
-import { CalendarWeekViewHeaderComponent } from './calendar-week-view-header/calendar-week-view-header.component';
+import { CalendarWeekViewHeaderComponent } from '../calendar-week-view/calendar-week-view-header/calendar-week-view-header.component';
 import { NgTemplateOutlet, NgClass } from '@angular/common';
-import { CalendarWeekViewEventComponent } from './calendar-week-view-event/calendar-week-view-event.component';
-import { CalendarWeekViewHourSegmentComponent } from './calendar-week-view-hour-segment/calendar-week-view-hour-segment.component';
-import { CalendarWeekViewCurrentTimeMarkerComponent } from './calendar-week-view-current-time-marker/calendar-week-view-current-time-marker.component';
+import { CalendarWeekViewEventComponent } from '../calendar-week-view/calendar-week-view-event/calendar-week-view-event.component';
+import { CalendarWeekViewHourSegmentComponent } from '../calendar-week-view/calendar-week-view-hour-segment/calendar-week-view-hour-segment.component';
+import { CalendarWeekViewCurrentTimeMarkerComponent } from '../calendar-week-view/calendar-week-view-current-time-marker/calendar-week-view-current-time-marker.component';
 import { ClickDirective } from '../../common/click/click.directive';
+import { OtoCalendarViewBreakTimeMarkerComponent } from '../../day/oto-calendar-view-break-time-marker/oto-calendar-view-break-time-marker.component';
+import { OperationDealerHour } from '../../common/util/definition';
 
-export interface WeekViewAllDayEventResize {
+interface WeekViewAllDayEventResize {
   originalOffset: number;
   originalSpan: number;
   edge: string;
 }
-
-export interface CalendarWeekViewBeforeRenderEvent extends WeekView {
+interface CalendarWeekViewBeforeRenderEvent extends WeekView {
   header: WeekDay[];
 }
 
-/**
- * Shows all events on a given week. Example usage:
- *
- * ```typescript
- * <mwl-calendar-week-view
- *  [viewDate]="viewDate"
- *  [events]="events">
- * </mwl-calendar-week-view>
- * ```
- */
 @Component({
-  selector: 'mwl-calendar-week-view',
+  selector: 'mwl-oto-calendar-week-view',
   template: `
-    <div class="cal-week-view" role="grid">
+    <div class="cal-week-view" role="grid" style="margin-top: 20px;">
       <mwl-calendar-week-view-header
         [days]="days"
         [locale]="locale"
@@ -273,17 +259,14 @@ export interface CalendarWeekViewBeforeRenderEvent extends WeekView {
             column of view.hourColumns;
             track column.hours[0]
               ? column.hours[0].segments[0].date.toISOString()
-              : column
+              : column;
+            let i = $index
           ) {
             <div class="cal-day-column">
-              <mwl-calendar-week-view-current-time-marker
+              <mwl-oto-calendar-view-break-time-marker
                 [columnDate]="column.date"
-                [dayStartHour]="dayStartHour"
-                [dayStartMinute]="dayStartMinute"
-                [dayEndHour]="dayEndHour"
-                [dayEndMinute]="dayEndMinute"
-                [hourSegments]="hourSegments"
                 [hourDuration]="hourDuration"
+                [operationHour]="weekOperationHour[i]"
                 [hourSegmentHeight]="hourSegmentHeight"
                 [customTemplate]="currentTimeMarkerTemplate"
               />
@@ -463,335 +446,136 @@ export interface CalendarWeekViewBeforeRenderEvent extends WeekView {
     ResizeHandleDirective,
     CalendarWeekViewEventComponent,
     CalendarWeekViewHourSegmentComponent,
-    CalendarWeekViewCurrentTimeMarkerComponent,
+    OtoCalendarViewBreakTimeMarkerComponent,
     ClickDirective,
   ],
 })
-export class CalendarWeekViewComponent
+export class OtoCalendarWeekViewComponent
   implements OnChanges, OnInit, OnDestroy, AfterViewInit
 {
-  /**
-   * The current view date
-   */
-
   @Input() columns: number;
-
+  @Input() weekOperationHour: Array<OperationDealerHour>;
   @Input() viewDate: Date;
 
-  /**
-   * An array of events to display on view
-   * The schema is available here: https://github.com/mattlewis92/calendar-utils/blob/c51689985f59a271940e30bc4e2c4e1fee3fcb5c/src/calendarUtils.ts#L49-L63
-   */
   @Input() events: CalendarEvent[] = [];
 
-  /**
-   * An array of day indexes (0 = sunday, 1 = monday etc) that will be hidden on the view
-   */
   @Input() excludeDays: number[] = [];
 
-  /**
-   * An observable that when emitted on will re-render the current view
-   */
   @Input() refresh: Subject<any>;
 
-  /**
-   * The locale used to format dates
-   */
   @Input() locale: string = inject(LOCALE_ID);
 
-  /**
-   * The placement of the event tooltip
-   */
   @Input() tooltipPlacement: PlacementArray = 'auto';
 
-  /**
-   * A custom template to use for the event tooltips
-   */
   @Input() tooltipTemplate: TemplateRef<any>;
 
-  /**
-   * Whether to append tooltips to the body or next to the trigger element
-   */
   @Input() tooltipAppendToBody: boolean = true;
 
-  /**
-   * The delay in milliseconds before the tooltip should be displayed. If not provided the tooltip
-   * will be displayed immediately.
-   */
   @Input() tooltipDelay: number | null = null;
 
-  /**
-   * The start number of the week.
-   * This is ignored when the `daysInWeek` input is also set as the `viewDate` will be used as the start of the week instead.
-   * Note, you should also pass this to the calendar title pipe so it shows the same days: {{ viewDate | calendarDate:(view + 'ViewTitle'):locale:weekStartsOn }}
-   * If using the moment date adapter this option won't do anything and you'll need to set it globally like so:
-   * ```
-   * moment.updateLocale('en', {
-   *   week: {
-   *     dow: 1, // set start of week to monday instead
-   *     doy: 0,
-   *   },
-   * });
-   * ```
-   */
   @Input() weekStartsOn: number;
 
-  /**
-   * A custom template to use to replace the header
-   */
   @Input() headerTemplate: TemplateRef<any>;
 
-  /**
-   * A custom template to use for week view events
-   */
   @Input() eventTemplate: TemplateRef<any>;
 
-  /**
-   * A custom template to use for event titles
-   */
   @Input() eventTitleTemplate: TemplateRef<any>;
 
-  /**
-   * A custom template to use for event actions
-   */
   @Input() eventActionsTemplate: TemplateRef<any>;
 
-  /**
-   * The precision to display events.
-   * `days` will round event start and end dates to the nearest day and `minutes` will not do this rounding
-   */
   @Input() precision: 'days' | 'minutes' = 'days';
 
-  /**
-   * An array of day indexes (0 = sunday, 1 = monday etc) that indicate which days are weekends
-   */
   @Input() weekendDays: number[];
 
-  /**
-   * Whether to snap events to a grid when dragging
-   */
   @Input() snapDraggedEvents: boolean = true;
 
-  /**
-   * The number of segments in an hour. Must divide equally into 60.
-   */
-  @Input() hourSegments: number = 2;
-
-  /**
-   * The duration of each segment group in minutes
-   */
   @Input() hourDuration: number;
 
-  /**
-   * The height in pixels of each hour segment
-   */
   @Input() hourSegmentHeight: number = 30;
 
-  /**
-   * The minimum height in pixels of each event
-   */
   @Input() minimumEventHeight: number = 30;
 
-  /**
-   * The day start hours in 24 hour time. Must be 0-23
-   */
-  @Input() dayStartHour: number = 0;
-
-  /**
-   * The day start minutes. Must be 0-59
-   */
-  @Input() dayStartMinute: number = 0;
-
-  /**
-   * The day end hours in 24 hour time. Must be 0-23
-   */
-  @Input() dayEndHour: number = 23;
-
-  /**
-   * The day end minutes. Must be 0-59
-   */
-  @Input() dayEndMinute: number = 59;
-
-  /**
-   * A custom template to use to replace the hour segment
-   */
   @Input() hourSegmentTemplate: TemplateRef<any>;
 
-  /**
-   * The grid size to snap resizing and dragging of hourly events to
-   */
   @Input() eventSnapSize: number;
 
-  /**
-   * A custom template to use for the all day events label text
-   */
   @Input() allDayEventsLabelTemplate: TemplateRef<any>;
 
-  /**
-   * The number of days in a week. Can be used to create a shorter or longer week view.
-   * The first day of the week will always be the `viewDate` and `weekStartsOn` if set will be ignored
-   */
   @Input() daysInWeek: number;
 
-  /**
-   * A custom template to use for the current time marker
-   */
   @Input() currentTimeMarkerTemplate: TemplateRef<any>;
 
-  /**
-   * Allow you to customise where events can be dragged and resized to.
-   * Return true to allow dragging and resizing to the new location, or false to prevent it
-   */
   @Input() validateEventTimesChanged: (
     event: CalendarEventTimesChangedEvent,
   ) => boolean;
 
-  /**
-   * Customise the document cursor when dragging to resize an event
-   */
   @Input() resizeCursors: Partial<
     Pick<ResizeCursors, 'leftOrRight' | 'topOrBottom'>
   >;
 
-  /**
-   * Called when a header week day is clicked. Adding a `cssClass` property on `$event.day` will add that class to the header element
-   */
   @Output() dayHeaderClicked = new EventEmitter<{
     day: WeekDay;
     sourceEvent: MouseEvent;
   }>();
 
-  /**
-   * Called when an event title is clicked
-   */
   @Output() eventClicked = new EventEmitter<{
     event: CalendarEvent;
     sourceEvent: MouseEvent | KeyboardEvent;
   }>();
 
-  /**
-   * Called when an event is resized or dragged and dropped
-   */
   @Output() eventTimesChanged =
     new EventEmitter<CalendarEventTimesChangedEvent>();
 
-  /**
-   * An output that will be called before the view is rendered for the current week.
-   * If you add the `cssClass` property to a day in the header it will add that class to the cell element in the template
-   */
   @Output() beforeViewRender =
     new EventEmitter<CalendarWeekViewBeforeRenderEvent>();
 
-  /**
-   * Called when an hour segment is clicked
-   */
   @Output() hourSegmentClicked = new EventEmitter<{
     date: Date;
     sourceEvent: MouseEvent;
   }>();
 
-  /**
-   * @hidden
-   */
   days: WeekDay[];
 
-  /**
-   * @hidden
-   */
   view: WeekView;
 
-  /**
-   * @hidden
-   */
   refreshSubscription: Subscription;
 
-  /**
-   * @hidden
-   */
   allDayEventResizes: Map<WeekViewAllDayEvent, WeekViewAllDayEventResize> =
     new Map();
 
-  /**
-   * @hidden
-   */
   timeEventResizes: Map<CalendarEvent, ResizeEvent> = new Map();
 
-  /**
-   * @hidden
-   */
   eventDragEnterByType = {
     allDay: 0,
     time: 0,
   };
 
-  /**
-   * @hidden
-   */
   dragActive = false;
 
-  /**
-   * @hidden
-   */
   dragAlreadyMoved = false;
 
-  /**
-   * @hidden
-   */
   validateDrag: ValidateDrag;
 
-  /**
-   * @hidden
-   */
   validateResize: (args: any) => boolean;
 
-  /**
-   * @hidden
-   */
   dayColumnWidth: number;
 
-  /**
-   * @hidden
-   */
   calendarId = Symbol('angular calendar week view id');
 
-  /**
-   * @hidden
-   */
   lastDraggedEvent: CalendarEvent;
 
-  /**
-   * @hidden
-   */
   rtl = false;
 
-  /**
-   * @hidden
-   */
   private lastDragEnterDate: Date;
 
-  /**
-   * @hidden
-   */
   protected cdr = inject(ChangeDetectorRef);
 
-  /**
-   * @hidden
-   */
   protected utils = inject(CalendarUtils);
 
-  /**
-   * @hidden
-   */
   protected dateAdapter = inject(DateAdapter);
 
-  /**
-   * @hidden
-   */
   protected element = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  /**
-   * @hidden
-   */
   ngOnInit(): void {
     if (this.refresh) {
       this.refreshSubscription = this.refresh.subscribe(() => {
@@ -801,9 +585,6 @@ export class CalendarWeekViewComponent
     }
   }
 
-  /**
-   * @hidden
-   */
   ngOnChanges(changes: any): void {
     const refreshHeader =
       changes.viewDate ||
@@ -814,11 +595,6 @@ export class CalendarWeekViewComponent
 
     const refreshBody =
       changes.viewDate ||
-      changes.dayStartHour ||
-      changes.dayStartMinute ||
-      changes.dayEndHour ||
-      changes.dayEndMinute ||
-      changes.hourSegments ||
       changes.hourDuration ||
       changes.weekStartsOn ||
       changes.weekendDays ||
@@ -845,18 +621,12 @@ export class CalendarWeekViewComponent
     }
   }
 
-  /**
-   * @hidden
-   */
   ngOnDestroy(): void {
     if (this.refreshSubscription) {
       this.refreshSubscription.unsubscribe();
     }
   }
 
-  /**
-   * @hidden
-   */
   ngAfterViewInit() {
     this.rtl =
       typeof window !== 'undefined' &&
@@ -864,9 +634,6 @@ export class CalendarWeekViewComponent
     this.cdr.detectChanges();
   }
 
-  /**
-   * @hidden
-   */
   timeEventResizeStarted(
     eventsContainer: HTMLElement,
     timeEvent: WeekViewTimeEvent,
@@ -876,9 +643,6 @@ export class CalendarWeekViewComponent
     this.resizeStarted(eventsContainer, timeEvent);
   }
 
-  /**
-   * @hidden
-   */
   timeEventResizing(timeEvent: WeekViewTimeEvent, resizeEvent: ResizeEvent) {
     this.timeEventResizes.set(timeEvent.event, resizeEvent);
     const adjustedEvents = new Map<CalendarEvent, CalendarEvent>();
@@ -898,10 +662,6 @@ export class CalendarWeekViewComponent
 
     this.restoreOriginalEvents(tempEvents, adjustedEvents, true);
   }
-
-  /**
-   * @hidden
-   */
   timeEventResizeEnded(timeEvent: WeekViewTimeEvent) {
     this.view = this.getWeekView(this.events);
     const lastResizeEvent = this.timeEventResizes.get(timeEvent.event);
@@ -920,9 +680,6 @@ export class CalendarWeekViewComponent
     }
   }
 
-  /**
-   * @hidden
-   */
   allDayEventResizeStarted(
     allDayEventsContainer: HTMLElement,
     allDayEvent: WeekViewAllDayEvent,
@@ -940,9 +697,6 @@ export class CalendarWeekViewComponent
     );
   }
 
-  /**
-   * @hidden
-   */
   allDayEventResizing(
     allDayEvent: WeekViewAllDayEvent,
     resizeEvent: ResizeEvent,
@@ -964,9 +718,6 @@ export class CalendarWeekViewComponent
     }
   }
 
-  /**
-   * @hidden
-   */
   allDayEventResizeEnded(allDayEvent: WeekViewAllDayEvent): void {
     const currentResize: WeekViewAllDayEventResize =
       this.allDayEventResizes.get(allDayEvent);
@@ -999,23 +750,14 @@ export class CalendarWeekViewComponent
     }
   }
 
-  /**
-   * @hidden
-   */
   getDayColumnWidth(eventRowContainer: HTMLElement): number {
     return Math.floor(eventRowContainer.offsetWidth / this.days.length);
   }
 
-  /**
-   * @hidden
-   */
   dateDragEnter(date: Date) {
     this.lastDragEnterDate = date;
   }
 
-  /**
-   * @hidden
-   */
   eventDropped(
     dropEvent: Pick<
       DropEvent<{ event?: CalendarEvent; calendarId?: symbol }>,
@@ -1040,23 +782,14 @@ export class CalendarWeekViewComponent
     this.lastDraggedEvent = null;
   }
 
-  /**
-   * @hidden
-   */
   dragEnter(type: 'allDay' | 'time') {
     this.eventDragEnterByType[type]++;
   }
 
-  /**
-   * @hidden
-   */
   dragLeave(type: 'allDay' | 'time') {
     this.eventDragEnterByType[type]--;
   }
 
-  /**
-   * @hidden
-   */
   dragStarted(
     eventsContainerElement: HTMLElement,
     eventElement: HTMLElement,
@@ -1119,9 +852,6 @@ export class CalendarWeekViewComponent
     this.cdr.markForCheck();
   }
 
-  /**
-   * @hidden
-   */
   dragMove(dayEvent: WeekViewTimeEvent, dragEvent: DragMoveEvent) {
     const newEventTimes = this.getDragMovedEventTimes(
       dayEvent,
@@ -1145,16 +875,10 @@ export class CalendarWeekViewComponent
     this.dragAlreadyMoved = true;
   }
 
-  /**
-   * @hidden
-   */
   allDayEventDragMove() {
     this.dragAlreadyMoved = true;
   }
 
-  /**
-   * @hidden
-   */
   dragEnded(
     weekEvent: WeekViewAllDayEvent | WeekViewTimeEvent,
     dragEndEvent: DragEndEvent,
@@ -1229,15 +953,15 @@ export class CalendarWeekViewComponent
       excluded: this.excludeDays,
       precision: this.precision,
       absolutePositionedEvents: true,
-      hourSegments: this.hourSegments,
+      hourSegments: this.weekOperationHour[0].hourSegments,
       hourDuration: this.hourDuration,
       dayStart: {
-        hour: this.dayStartHour,
-        minute: this.dayStartMinute,
+        hour: this.weekOperationHour[0].startHour,
+        minute: this.weekOperationHour[0].startMinute,
       },
       dayEnd: {
-        hour: this.dayEndHour,
-        minute: this.dayEndMinute,
+        hour: this.weekOperationHour[0].endHour,
+        minute: this.weekOperationHour[0].endMinute,
       },
       segmentHeight: this.hourSegmentHeight,
       weekendDays: this.weekendDays,
@@ -1264,7 +988,7 @@ export class CalendarWeekViewComponent
     const minutesMoved = useY
       ? getMinutesMoved(
           dragEndEvent.y,
-          this.hourSegments,
+          this.weekOperationHour[0].hourSegments,
           this.hourSegmentHeight,
           this.eventSnapSize,
           this.hourDuration,
@@ -1411,7 +1135,7 @@ export class CalendarWeekViewComponent
     if (typeof resizeEvent.edges.top !== 'undefined') {
       const minutesMoved = getMinutesMoved(
         resizeEvent.edges.top as number,
-        this.hourSegments,
+        this.weekOperationHour[0].hourSegments,
         this.hourSegmentHeight,
         this.eventSnapSize,
         this.hourDuration,
@@ -1428,7 +1152,7 @@ export class CalendarWeekViewComponent
     } else if (typeof resizeEvent.edges.bottom !== 'undefined') {
       const minutesMoved = getMinutesMoved(
         resizeEvent.edges.bottom as number,
-        this.hourSegments,
+        this.weekOperationHour[0].hourSegments,
         this.hourSegmentHeight,
         this.eventSnapSize,
         this.hourDuration,
@@ -1502,9 +1226,6 @@ export class CalendarWeekViewComponent
     this.cdr.markForCheck();
   }
 
-  /**
-   * @hidden
-   */
   protected getAllDayEventResizedDates(
     event: CalendarEvent,
     daysDiff: number,

@@ -12,6 +12,9 @@ export {
   CalendarWeekViewComponent,
   CalendarWeekViewBeforeRenderEvent,
 } from './calendar-week-view/calendar-week-view.component';
+
+export { OtoCalendarWeekViewComponent } from './oto-calendar-week-view/oto-calendar-week-view.component';
+
 export {
   WeekViewAllDayEvent as CalendarWeekViewAllDayEvent,
   WeekViewAllDayEventRow as CalendarWeekViewAllDayEventRow,
