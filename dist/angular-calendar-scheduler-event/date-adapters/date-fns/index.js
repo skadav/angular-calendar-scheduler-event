@@ -1,0 +1,30 @@
+import { adapterFactory as baseAdapterFactory } from 'calendar-utils/date-adapters/date-fns';
+import {
+  addWeeks,
+  addMonths,
+  subDays,
+  subWeeks,
+  subMonths,
+  getISOWeek,
+  setDate,
+  setMonth,
+  setYear,
+  getDate,
+  getYear,
+} from 'date-fns';
+export function adapterFactory() {
+  return Object.assign(Object.assign({}, baseAdapterFactory()), {
+    addWeeks,
+    addMonths,
+    subDays,
+    subWeeks,
+    subMonths,
+    getISOWeek,
+    setDate,
+    setMonth,
+    setYear,
+    getDate,
+    getYear,
+  });
+}
+//# sourceMappingURL=index.js.map

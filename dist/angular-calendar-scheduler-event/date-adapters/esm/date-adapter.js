@@ -1,0 +1,2 @@
+export class DateAdapter {}
+//# sourceMappingURL=date-adapter.js.map
