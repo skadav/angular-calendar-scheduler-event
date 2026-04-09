@@ -4,7 +4,7 @@
     "module": "es2015",
     "declaration": true,
     "stripInternal": true,
-    "outDir": "./dist/angular-calendar-scheduler-event/date-adapters",
+    "outDir": "./dist/date-adapters",
     "types": [],
     "emitDecoratorMetadata": false,
     "baseUrl": "",
