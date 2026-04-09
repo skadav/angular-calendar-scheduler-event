@@ -1,7 +1,36 @@
 {
   "name": "angular-calendar-scheduler-event",
-  "version": "1.00.02",
-  "description": "A calendar component for angular 20.2+ that can display events on a month, week or day view",
+  "version": "1.0.0",
+  "description": "Angular calendar scheduler extension",
+  "license": "MIT",
+  "main": "./fesm2022/angular-calendar-scheduler-event.mjs",
+  "module": "./fesm2022/angular-calendar-scheduler-event.mjs",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./fesm2022/angular-calendar-scheduler-event.mjs",
+      "require": "./fesm2022/angular-calendar-scheduler-event.mjs"
+    },
+    "./date-adapters/date-adapter": {
+      "types": "./date-adapters/index.d.ts",
+      "import": "./date-adapters/esm/date-adapter.js",
+      "require": "./date-adapters/index.js"
+    },
+    "./date-adapters/date-fns": {
+      "types": "./date-adapters/date-fns/index.d.ts",
+      "import": "./date-adapters/esm/date-fns/index.js",
+      "require": "./date-adapters/date-fns/index.js"
+    },
+    "./date-adapters/moment": {
+      "types": "./date-adapters/moment/index.d.ts",
+      "import": "./date-adapters/esm/moment/index.js",
+      "require": "./date-adapters/moment/index.js"
+    },
+    "./scss/*": {
+      "sass": "./scss/*"
+    }
+  },
   "funding": {
     "url": "https://github.com/sponsors/mattlewis92"
   },
@@ -68,7 +97,6 @@
     "schematics"
   ],
   "author": "Matt Lewis",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/mattlewis92/angular-calendar/issues"
   },
@@ -163,29 +191,6 @@
     "calendar-utils": "^0.12.5",
     "positioning": "^3.0.1",
     "tslib": "^2.4.1"
-  },
-  "exports": {
-    "./date-adapters/date-adapter": {
-      "main": "./date-adapters/index.js",
-      "types": "./date-adapters/index.d.ts",
-      "require": "./date-adapters/index.js",
-      "import": "./date-adapters/esm/date-adapter.js"
-    },
-    "./date-adapters/date-fns": {
-      "main": "./date-adapters/date-fns/index.js",
-      "types": "./date-adapters/date-fns/index.d.ts",
-      "require": "./date-adapters/date-fns/index.js",
-      "import": "./date-adapters/esm/date-fns/index.js"
-    },
-    "./date-adapters/moment": {
-      "main": "./date-adapters/moment/index.js",
-      "types": "./date-adapters/moment/index.d.ts",
-      "require": "./date-adapters/moment/index.js",
-      "import": "./date-adapters/esm/moment/index.js"
-    },
-    "./scss/*": {
-      "sass": "./scss/*"
-    }
   },
   "peerDependencies": {
     "@angular/core": ">=20.2.0",

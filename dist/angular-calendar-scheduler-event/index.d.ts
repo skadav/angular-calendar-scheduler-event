@@ -2350,6 +2350,7 @@ declare class CalendarWeekModule {
   static ɵinj: i0.ɵɵInjectorDeclaration<CalendarWeekModule>;
 }
 
+type CalendarDayViewBeforeRenderEvent = CalendarWeekViewBeforeRenderEvent$2;
 /**
  * Shows all events on a given day. Example usage:
  *
@@ -2857,6 +2858,7 @@ export {
 export type {
   A11yParams,
   CalendarDateFormatterInterface,
+  CalendarDayViewBeforeRenderEvent,
   CalendarEventTimesChangedEvent,
   CalendarMonthViewBeforeRenderEvent,
   CalendarMonthViewEventTimesChangedEvent,

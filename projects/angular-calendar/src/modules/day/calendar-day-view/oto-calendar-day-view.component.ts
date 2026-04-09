@@ -63,13 +63,13 @@ import {
 } from '../../common/util/definition';
 import { OtoCalendarViewBreakTimeMarkerComponent } from '../oto-calendar-view-break-time-marker/oto-calendar-view-break-time-marker.component';
 
-interface WeekViewAllDayEventResize {
+export interface WeekViewAllDayEventResize {
   originalOffset: number;
   originalSpan: number;
   edge: string;
 }
 
-interface CalendarWeekViewBeforeRenderEvent extends WeekView {
+export interface CalendarWeekViewBeforeRenderEvent extends WeekView {
   header: WeekDay[];
 }
 @Component({

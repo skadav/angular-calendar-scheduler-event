@@ -13,7 +13,8 @@ import { CalendarWeekViewBeforeRenderEvent } from '../../week/calendar-week.modu
 import { ResizeCursors } from 'angular-resizable-element';
 import { CalendarWeekViewComponent } from '../../week/calendar-week-view/calendar-week-view.component';
 
-type CalendarDayViewBeforeRenderEvent = CalendarWeekViewBeforeRenderEvent;
+export type CalendarDayViewBeforeRenderEvent =
+  CalendarWeekViewBeforeRenderEvent;
 
 /**
  * Shows all events on a given day. Example usage:
